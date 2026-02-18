@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "q_shared.h"
 #include "qcommon.h"
+#include <string.h>
 
 #define	MAX_CMD_BUFFER  128*1024
 #define	MAX_CMD_LINE	1024
@@ -853,6 +854,35 @@ void Cmd_CompleteCfgName( char *args, int argNum ) {
 }
 
 /*
+===============
+Cmd_Randmap_f
+
+Inserts the current value of a variable as command text
+===============
+*/
+void Cmd_Randmap_f( void ) {
+	int		c;
+	char	*cmd;
+	char	nextmap[32];
+
+	c = Cmd_Argc();
+	cmd = Cmd_Argv(0);
+
+	if (c != 3) {
+		Com_Printf("usage: %s <prefix> <count>\n", cmd);
+		return;
+	}
+
+	if (strlen(Cmd_Argv(1)) + strlen(Cmd_Argv(2)) > 32) {
+		Com_Printf("cmd %s: prefix + count max length is 31\n", cmd);
+		return;
+	}
+
+	Com_sprintf(nextmap, 32, "%s%d", Cmd_Argv(1), (rand() % atoi(Cmd_Argv(2))) + 1);
+	Cbuf_InsertText(va("%s\n", Cvar_VariableString(nextmap)));
+}
+
+/*
 ============
 Cmd_Init
 ============
@@ -867,5 +897,6 @@ void Cmd_Init (void) {
 	Cmd_SetCommandCompletionFunc( "vstr", Cvar_CompleteCvarName );
 	Cmd_AddCommand ("echo",Cmd_Echo_f);
 	Cmd_AddCommand ("wait", Cmd_Wait_f);
+	Cmd_AddCommand ("randmap", Cmd_Randmap_f);
 }
 
